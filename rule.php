@@ -32,6 +32,7 @@
  */
 
  use mod_quiz\local\access_rule_base;
+ use mod_quiz\quiz_settings;
  use quizaccess_sebprogram\program;
  use quizaccess_sebprogram\program_quiz;
  use quizaccess_seb\seb_access_manager;
@@ -50,7 +51,7 @@
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_sebprogram extends quiz_access_rule_base {
+class quizaccess_sebprogram extends \mod_quiz\local\access_rule_base {
 
     /**
      * Return an appropriately configured instance of this rule, if it is applicable
@@ -59,9 +60,9 @@ class quizaccess_sebprogram extends quiz_access_rule_base {
      * @param int $timenow the time that should be considered as 'now'.
      * @param bool $canignoretimelimits whether the current user is exempt from
      *      time limits by the mod/quiz:ignoretimelimits capability.
-     * @return quiz_access_rule_base|null the rule, if applicable, else null.
+     * @return \mod_quiz\local\access_rule_base|null the rule, if applicable, else null.
      */
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
+    public static function make(\mod_quiz\quiz_settings $quizobj, $timenow, $canignoretimelimits) {
         $accessmanager = new seb_access_manager($quizobj);
         // If Safe Exam Browser is not required, this access rule is not applicable.
         if (!$accessmanager->seb_required()) {

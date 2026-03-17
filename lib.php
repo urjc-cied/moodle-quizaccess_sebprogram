@@ -53,7 +53,7 @@ function quizaccess_sebprogram_override_webservice_execution($function, $params)
             $configkey = $params[2];
             $browserexamkey = $params[3];
 
-        \external_api::validate_context(\context_module::instance($cmid));
+        \core_external\external_api::validate_context(\context_module::instance($cmid));
 
         // At least one SEB key must be provided.
         if (empty($configkey) && empty($browserexamkey)) {
