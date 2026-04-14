@@ -145,15 +145,27 @@ class quizaccess_sebprogram extends \mod_quiz\local\access_rule_base {
         } else {
             $context = context_course::instance($idcurse);
         }
-        $mform->addElement('header', 'sebprogramheader_my', get_string('pluginname', 'quizaccess_sebprogram'));
+
+        if (!has_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', $context) || 
+            !$mform->elementExists('security') || 
+            !$mform->elementExists('seb_requiresafeexambrowser')) {
+            return;
+        }
+
+        $canmanageprograms = has_capability('quizaccess/sebprogram:manageprograms', $context);
 
         $currenturl = $PAGE->url;
         // Not needed at the moment 'session_start();'.
         $_SESSION['urleditquiz'] = $currenturl;
-        if (has_capability('quizaccess/sebprogram:manageprograms',  $context)) {
-            $mform->addElement('button', 'seb_program_button_admin_programs_course',
-                '<a href="'. new moodle_url("/mod/quiz/accessrule/sebprogram/view_course.php",
-                    ['course' => $idcurse]).'">'. get_string('managetemplates', 'quizaccess_sebprogram') . '</a>');
+        if ($canmanageprograms) {
+            $manageurl = new moodle_url('/mod/quiz/accessrule/sebprogram/view_course.php', ['course' => $idcurse]);
+            $btnhtml = html_writer::link($manageurl, get_string('managetemplates', 'quizaccess_sebprogram'), ['class' => 'btn btn-secondary']);
+            
+            $mform->insertElementBefore(
+                $mform->createElement('static', 'seb_program_button_admin_programs_course', '', $btnhtml), 
+                'security'
+            );
+            $mform->hideIf('seb_program_button_admin_programs_course', 'seb_requiresafeexambrowser', 'noteq', settings_provider::USE_SEB_CONFIG_MANUALLY);
         }
 
         $recordprograms = program::get_records_course($idcurse, 'id', true);
@@ -161,31 +173,21 @@ class quizaccess_sebprogram extends \mod_quiz\local\access_rule_base {
         foreach ($recordprograms as $record) {
             $programlist[$record->id] = $record->title;
         }
-        $mform->addElement('autocomplete', 'seb_program_autocomplete_program_quiz', 'Programs', $programlist, ['multiple' => true]);
+
+        $mform->insertElementBefore(
+            $mform->createElement('autocomplete', 'seb_program_autocomplete_program_quiz', get_string('programs', 'quizaccess_sebprogram'), $programlist, ['multiple' => true]),
+            'security'
+        );
         $mform->setType('seb_program_autocomplete_program_quiz', PARAM_RAW);
+        $mform->hideIf('seb_program_autocomplete_program_quiz', 'seb_requiresafeexambrowser', 'noteq', settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         // Si es un editar obtener los programas a seleccionar.
         if ($idquiz > 0) {
-            $recordsprogramselect = $DB->get_records('quizaccess_seb_program_quiz', ['idquiz' => $idquiz]);
-            $programselectlist = [];
-            foreach ($recordsprogramselect as $record) {
-                array_push($programselectlist, $record->idprogram);
+            $programselectlist = $DB->get_fieldset_select('quizaccess_seb_program_quiz', 'idprogram', 'idquiz = ?', [$idquiz]);
+            if (!empty($programselectlist)) {
+                $mform->getElement('seb_program_autocomplete_program_quiz')->setValue($programselectlist);
             }
-            $mform->getElement('seb_program_autocomplete_program_quiz')->setValue($programselectlist);
         }
-
-        if ($mform->elementExists("security")) {
-                $mform->removeElement("sebprogramheader_my", false);
-            if (has_capability('quizaccess/sebprogram:manageprograms', $context)) {
-                $mform->insertElementBefore($mform->removeElement("seb_program_button_admin_programs_course", false), 'security');
-                $mform->hideIf("seb_program_button_admin_programs_course", "seb_requiresafeexambrowser", "noteq",
-                    settings_provider::USE_SEB_CONFIG_MANUALLY);
-            }
-            $mform->insertElementBefore($mform->removeElement("seb_program_autocomplete_program_quiz", false), 'security');
-            $mform->hideIf("seb_program_autocomplete_program_quiz", "seb_requiresafeexambrowser", "noteq",
-                settings_provider::USE_SEB_CONFIG_MANUALLY);
-        }
-
     }
 
     /**
@@ -196,7 +198,10 @@ class quizaccess_sebprogram extends \mod_quiz\local\access_rule_base {
     public static function save_settings($quiz) {
         global $DB;
 
-        $idprogramselects = $quiz->seb_program_autocomplete_program_quiz;
+        $idprogramselects = $quiz->seb_program_autocomplete_program_quiz ?? [];
+        if (!is_array($idprogramselects)) {
+            $idprogramselects = [];
+        }
         $programselectlist = [];
 
         $recordsprogramselect = $DB->get_records('quizaccess_seb_program_quiz', ['idquiz' => $quiz->id]);

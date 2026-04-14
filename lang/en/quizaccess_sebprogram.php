@@ -82,3 +82,4 @@ $string['originalname_help'] = 'Original file name of the executable. Some files
     don\'t have this metadata information. If it is available, SEB will prioritize this string over the Executable file name string';
 $string['path_help'] = 'Path to the directory of the executable process excluding the file name.';
 $string['dependency_help'] = 'List of other programs, that this one need to work properly';
+$string['programs'] = 'Programs';

@@ -82,3 +82,4 @@ $string['originalname_help'] = 'Nombre original del archivo ejecutable. Algunos 
     no tienen esta información de metadatos. Si está disponible, SEB dará prioridad a este valor sobre el el valor del \'Ejecutable\'.';
 $string['path_help'] = 'Ruta al directorio del ejecutable del proceso excluyendo el nombre del archivo.';
 $string['dependency_help'] = 'Lista de otros programas que son necesarios para que éste funcione correctamente.';
+$string['programs'] = 'Programas';
