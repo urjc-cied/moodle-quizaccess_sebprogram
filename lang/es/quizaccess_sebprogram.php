@@ -83,3 +83,5 @@ $string['originalname_help'] = 'Nombre original del archivo ejecutable. Algunos 
 $string['path_help'] = 'Ruta al directorio del ejecutable del proceso excluyendo el nombre del archivo.';
 $string['dependency_help'] = 'Lista de otros programas que son necesarios para que éste funcione correctamente.';
 $string['programs'] = 'Programas';
+$string['managetemplates_heading'] = 'Administra la lista de programas permitidos para Safe Exam Browser.';
+$string['urlsfilter_heading'] = 'Configura las reglas de filtrado de red globales. Estas se aplicarán a todos los cuestionarios.';

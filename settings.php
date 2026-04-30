@@ -37,6 +37,50 @@ global $ADMIN;
 
 if (has_capability('quizaccess/sebprogram:manageprograms', context_system::instance())) {
     if ($ADMIN->fulltree) {
+
+        $settings->add(new admin_setting_heading(
+            'quizaccess_sebprogram/programs_heading',
+            new lang_string('managetemplates', 'quizaccess_sebprogram'),
+            new lang_string('managetemplates_heading', 'quizaccess_sebprogram')
+        ));
         $settings->add(new quizaccess_sebprogram_admin_setting_display_programs());
+
+        $settings->add(new admin_setting_heading(
+            'quizaccess_sebprogram/urls_heading',
+            new lang_string('seb_activateurlfiltering', 'quizaccess_seb'),
+            new lang_string('urlsfilter_heading', 'quizaccess_sebprogram')
+        ));
+
+        // --- 1. Expresiones Permitidas (Simples) ---
+        $settings->add(new admin_setting_configtextarea(
+            'quizaccess_sebprogram/allowed_urls',
+            new lang_string('seb_expressionsallowed', 'quizaccess_seb'),
+            new lang_string('seb_expressionsallowed_help', 'quizaccess_seb'),
+            ''
+        ));
+
+        // --- 2. Expresiones Regulares Permitidas (Regex) ---
+        $settings->add(new admin_setting_configtextarea(
+            'quizaccess_sebprogram/allowed_urls_regex',
+            new lang_string('seb_regexallowed', 'quizaccess_seb'),
+            new lang_string('seb_regexallowed_help', 'quizaccess_seb'),
+            ''
+        ));
+
+        // --- 3. Expresiones Bloqueadas (Simples) ---
+        $settings->add(new admin_setting_configtextarea(
+            'quizaccess_sebprogram/blocked_urls',
+            new lang_string('seb_expressionsblocked', 'quizaccess_seb'),
+            new lang_string('seb_expressionsblocked_help', 'quizaccess_seb'),
+            ''
+        ));
+
+        // --- 4. Expresiones Regulares Bloqueadas (Regex) ---
+        $settings->add(new admin_setting_configtextarea(
+            'quizaccess_sebprogram/blocked_urls_regex',
+            new lang_string('seb_regexblocked', 'quizaccess_seb'),
+            new lang_string('seb_regexblocked_help', 'quizaccess_seb'),
+            ''
+        ));
     }
 }

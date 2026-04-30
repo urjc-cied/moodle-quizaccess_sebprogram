@@ -83,3 +83,5 @@ $string['originalname_help'] = 'Original file name of the executable. Some files
 $string['path_help'] = 'Path to the directory of the executable process excluding the file name.';
 $string['dependency_help'] = 'List of other programs, that this one need to work properly';
 $string['programs'] = 'Programs';
+$string['managetemplates_heading'] = 'Manage the list of allowed programs for Safe Exam Browser.';
+$string['urlsfilter_heading'] = 'Configure global network filtering rules. These will be applied to all quizzes.';

@@ -464,6 +464,12 @@ class quiz_settings extends persistent {
         $this->plist->set_or_update_value('examSessionClearCookiesOnStart', new CFBoolean(false));
         $this->plist->set_or_update_value('allowPreferencesWindow', new CFBoolean(false));
 
+        //Inicio: agregar valores para MyApps URJC
+        $this->plist->set_or_update_value('allowVirtualMachine', new CFBoolean(true));
+        $this->plist->set_or_update_value('allowScreenSharing', new CFBoolean(true));
+        $this->plist->set_or_update_value('allowedDisplaysIgnoreFailure', new CFBoolean(true));
+        //Fin: agregar valores para MyApps URJC
+
         $sql = "SELECT sp.title, sp.executable, sp.originalname, sp.path, sp.display
                   FROM {quizaccess_seb_program} sp
                   JOIN {quizaccess_seb_program_quiz} sq ON sp.id = sq.idprogram
@@ -585,6 +591,28 @@ class quiz_settings extends persistent {
         $settings = $this->to_record();
         // Create rules to each expression provided and add to config.
         $urlfilterrules = [];
+        
+        $inject_global = function($configkey, $action, $isregex) use (&$urlfilterrules) {
+            $text = get_config('quizaccess_sebprogram', $configkey);
+            if (!empty($text)) {
+                $urls = explode("\n", str_replace("\r", "", $text));
+                foreach ($urls as $url) {
+                    $url = trim($url);
+                    if ($url !== '') {
+                        $urlfilterrules[] = $this->create_filter_rule($url, ($action == 1), $isregex);
+                    }
+                }
+            }
+        };
+
+        $inject_global('allowed_urls', 1, false);
+        $inject_global('allowed_urls_regex', 1, true);
+        $inject_global('blocked_urls', 0, false);
+        $inject_global('blocked_urls_regex', 0, true);
+        
+        // Protocolos internos obligatorios para evitar que el Safe Exam Browser se rompa al activar los filtros.
+        $urlfilterrules[] = $this->create_filter_rule('^(about|data|blob|chrome-extension):.*', true, true);
+
         // Get all rules separated by newlines and remove empty rules.
         $expallowed = array_filter(explode(PHP_EOL, $settings->expressionsallowed));
         $expblocked = array_filter(explode(PHP_EOL, $settings->expressionsblocked));
@@ -602,7 +630,13 @@ class quiz_settings extends persistent {
         foreach ($regblocked as $rulestring) {
             $urlfilterrules[] = $this->create_filter_rule($rulestring, false, true);
         }
-        $this->plist->add_element_to_root('URLFilterRules', new CFArray($urlfilterrules));
+        
+        if (!empty($urlfilterrules)) {
+            // 1. Activamos los filtros
+            $this->plist->set_or_update_value('URLFilterEnable', new CFBoolean(true));
+            // 2. Agregamos las reglas
+            $this->plist->add_element_to_root('URLFilterRules', new CFArray($urlfilterrules));
+        }
     }
 
     /**

@@ -173,6 +173,7 @@ class helper {
 
         return $config;
     }
+    
     /**
      * A helper function to get a list of seb config file headers.
      *
